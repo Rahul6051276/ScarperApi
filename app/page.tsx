@@ -3,18 +3,29 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 
+interface TrendingItem {
+  title?: string;
+  name?: string;
+  poster_path?: string | null;
+  backdrop_path?: string | null;
+}
+
 async function getTrendingMovies() {
-  const response = await fetch(
-    `https://api.themoviedb.org/3/trending/all/week?api_key=5a209f099efaba1cd26a904e09b90829`,
-    { next: { revalidate: 3600 } }
-  );
-  
-  if (!response.ok) {
+  try {
+    const response = await fetch(
+      "https://api.themoviedb.org/3/trending/all/week?api_key=5a209f099efaba1cd26a904e09b90829",
+      { next: { revalidate: 3600 } }
+    );
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return data.results || [];
+  } catch {
     return [];
   }
-  
-  const data = await response.json();
-  return data.results || [];
 }
 
 async function getGitHubStars() {
@@ -36,15 +47,24 @@ async function getGitHubStars() {
 }
 
 export default async function Home() {
-  const trending = await getTrendingMovies();
-  const stars = await getGitHubStars();
-  
-  const images = trending.slice(0, 50).map((item: any) => ({
-    src: item.poster_path 
-      ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-      : `https://image.tmdb.org/t/p/w500${item.backdrop_path}`,
-    alt: item.title || item.name || "Movie Poster"
-  }));
+  const [trending, stars] = await Promise.all([getTrendingMovies(), getGitHubStars()]);
+
+  const images = trending
+    .slice(0, 50)
+    .map((item: TrendingItem) => {
+      const path = item.poster_path || item.backdrop_path;
+      if (!path) {
+        return null;
+      }
+
+      return {
+        src: `https://image.tmdb.org/t/p/w500${path}`,
+        alt: item.title || item.name || "Movie Poster",
+      };
+    })
+    .filter((item): item is { src: string; alt: string } => item !== null);
+
+  const galleryImages = images.length > 0 ? images : undefined;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-zinc-950 font-sans overflow-hidden">
@@ -130,7 +150,7 @@ export default async function Home() {
 
       <div className="absolute inset-0 w-full h-full">
         <DomeGallery 
-          images={images}
+          images={galleryImages}
           fit={0.6}
           segments={35}
           grayscale={false}

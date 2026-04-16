@@ -2,12 +2,28 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 
+const DEFAULT_SITE_URL = "https://scarperapi.vercel.app";
+
+function getMetadataBase() {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    DEFAULT_SITE_URL;
+
+  try {
+    return new URL(siteUrl);
+  } catch {
+    return new URL(DEFAULT_SITE_URL);
+  }
+}
+
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: "ScraperAPI - Free Movie API & Streaming Links | Download & Watch Online",
   description: "Free Movie API for developers. Access streaming links, download options, and movie details from KMMovies, AnimeSalt, NetMirror. Get Bollywood, Hollywood, anime content with free API keys. Best free movie scraper API for movies, TV shows, and anime streaming.",
   keywords: [

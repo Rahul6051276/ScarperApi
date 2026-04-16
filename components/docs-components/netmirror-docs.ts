@@ -60,16 +60,16 @@ console.log(data);`,
     ],
     "totalResults": 50
   }
-}`
+}`,
   },
   {
     name: "NetMirror Search",
     method: "GET",
-    endpoint: "/api/netmirror/search",    provider: "NetMirror",    description: "Search for movies and shows on NetMirror",
+    endpoint: "/api/netmirror/search",
+    provider: "NetMirror",
+    description: "Search for movies and shows on NetMirror",
     requiresAuth: true,
-    parameters: [
-      { name: "q", type: "string", required: true, description: "Search query" },
-    ],
+    parameters: [{ name: "q", type: "string", required: true, description: "Search query" }],
     tsExample: `const response = await fetch(\`\${baseUrl}/api/netmirror/search?q=\${query}\`, {
   method: 'GET',
   headers: {
@@ -123,12 +123,14 @@ console.log(data);`,
       "timestamp": "1234567890"
     }
   }
-}`
+}`,
   },
   {
     name: "NetMirror Get Post",
     method: "GET",
-    endpoint: "/api/netmirror/getpost",    provider: "NetMirror",    description: "Get detailed information about a specific movie or show by ID",
+    endpoint: "/api/netmirror/getpost",
+    provider: "NetMirror",
+    description: "Get detailed information about a specific movie or show by ID",
     requiresAuth: true,
     parameters: [
       { name: "id", type: "string", required: true, description: "Movie/show ID" },
@@ -186,7 +188,7 @@ console.log(data);`,
     "id": "12345",
     "timestamp": "1234567890"
   }
-}`
+}`,
   },
   {
     name: "NetMirror Stream",
@@ -195,9 +197,7 @@ console.log(data);`,
     provider: "NetMirror",
     description: "Get streaming playlist URL for a movie or episode",
     requiresAuth: true,
-    parameters: [
-      { name: "id", type: "string", required: true, description: "Content ID for streaming" },
-    ],
+    parameters: [{ name: "id", type: "string", required: true, description: "Content ID for streaming" }],
     tsExample: `const response = await fetch(\`\${baseUrl}/api/netmirror/stream?id=\${id}\`, {
   method: 'GET',
   headers: {
@@ -276,6 +276,81 @@ console.log(data);`,
       "h": "abc123hash"
     }
   }
-}`
+}`,
+  },
+  {
+    name: "NetMirror Episodes",
+    method: "GET",
+    endpoint: "/api/netmirror/eps",
+    provider: "NetMirror",
+    description: "Get all episodes for a season, including paginated results",
+    requiresAuth: true,
+    parameters: [{ name: "link", type: "string", required: true, description: "Season ID, or seasonId|seriesId" }],
+    tsExample: `const response = await fetch(\`\${baseUrl}/api/netmirror/eps?link=12345|67890\`, {
+  method: 'GET',
+  headers: {
+    'x-api-key': 'YOUR_API_KEY',
+    'Content-Type': 'application/json'
   }
+});
+
+interface EpisodeLink {
+  title: string;
+  link: string;
+}
+
+interface NetMirrorEpisodesResponse {
+  success: boolean;
+  data?: {
+    episodes: EpisodeLink[];
+    totalEpisodes: number;
+    pagesFetched: number;
+    requestParams: {
+      link: string;
+      seasonId: string;
+      seriesId: string;
+      timestamp: string;
+    };
+  };
+}
+
+const data: NetMirrorEpisodesResponse = await response.json();
+console.log(data);`,
+    jsExample: `fetch(\`\${baseUrl}/api/netmirror/eps?link=12345|67890\`, {
+  method: 'GET',
+  headers: {
+    'x-api-key': 'YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+})
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));`,
+    curlExample: `curl -X GET "https://screenscapeapi.dev/api/netmirror/eps?link=12345%7C67890" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Content-Type: application/json"`,
+    responseExample: `{
+  "success": true,
+  "data": {
+    "episodes": [
+      {
+        "title": "Episode 1",
+        "link": "ep_12345"
+      },
+      {
+        "title": "Episode 2",
+        "link": "ep_12346"
+      }
+    ],
+    "totalEpisodes": 2,
+    "pagesFetched": 1,
+    "requestParams": {
+      "link": "12345|67890",
+      "seasonId": "12345",
+      "seriesId": "67890",
+      "timestamp": "1711122334"
+    }
+  }
+}`,
+  },
 ];
